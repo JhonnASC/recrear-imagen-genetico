@@ -1,63 +1,35 @@
 const Jimp = require('jimp');
 
-// Tamaño de la imagen
-const ancho = 100;
-const alto = 100;
+async function compareImages(imagePath1, imagePath2) {
+   console.log("asdios")
+    const image1 = await Jimp.read(imagePath1);
+    const image2 = await Jimp.read(imagePath2);
 
+    const width = image1.getWidth();
+    const height = image1.getHeight();
 
+    let score = 0;
 
-// Cargar la imagen objetivo
-Jimp.read('objetivo.png')
-  .then((targetImage) => {
-    targetImage.resize(ancho, alto);
-    const imagenRedimensionada = targetImage.resize(ancho, alto);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+        const pixel2 = Jimp.intToRGBA(image2.getPixelColor(x, y));
 
-  // Guardar la imagen redimensionada en un archivo PNG
-   imagenRedimensionada.writeAsync('imagen_objetivo.png');
-    const targetPixels = targetImage.bitmap.data;
- 
-
-  });
-
-// Crear una nueva imagen de 100x100 píxeles con fondo blanco
-new Jimp(ancho, alto, '#FFFFFF', (err, imagen) => {
-  if (err) throw err;
-
-  // Guardar la imagen
-  imagen.write('imagen_final', (err) => {
-    if (err) throw err;
-
-    console.log('asd');
-  });
-});
-
-
-
-
-
-
-let diferencias = 0;
-
-for (let x = 0; x < imagen.bitmap.width; x++) {
-  for (let y = 0; y < imagen1.bitmap.height; y++) {
-    const color1 = imagen1.getPixelColor(x, y);
-    const color2 = imagen2.getPixelColor(x, y);
-
-    if (color1 !== color2) {
-      diferencias++;
+        if (
+          pixel1.r === pixel2.r &&
+          pixel1.g === pixel2.g &&
+          pixel1.b === pixel2.b &&
+          pixel1.a === pixel2.a
+        ) {
+          score++;
+        }
+      }
     }
+    console.log(score)
+    return score;
   }
-}
-
-console.log(`Número de píxeles diferentes: ${diferencias}`);
 
 
-// crossover -- José, Jocsan
-// mutacion  --- José, Jocsan
-// grafica   -- Jhonn
-
-
-
-// web   -- Jhonn, Jocsan
-
-
+const imagePath1 = 'public/imagen_objetivo.png';
+const imagePath2 = 'public/imagen_final.png';
+console.log(compareImages(imagePath1, imagePath2))
