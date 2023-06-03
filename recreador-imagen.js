@@ -1,67 +1,15 @@
 const Jimp = require('jimp');
 
 const generaciones = 10;
+const tasaMutacion = 0.2; // 20% de los genes se mutarán
 
 //48672 es el numero de similitudes que estamos teniendo
 const imagePath1 = 'public/imagen_objetivo.png';  //imagen del usuario
-const arr2 = [{ x: 2, y: 3 }, { x: 5, y: 6 }, { x: 8, y: 9 }];
 
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
-const coordenadas = [{ x: 2, y: 3 }, { x: 5, y: 6 }, { x: 8, y: 9 }];
-
-async function compareImages(imagePath1, imagePath2) {
-  const image1 = await Jimp.read(imagePath1);
-  const image2 = await Jimp.read(imagePath2);
-
-  const width = image1.getWidth();
-  const height = image1.getHeight();
-  let score = 0;
-  const coordenadas = []; // Arreglo para almacenar las coordenadas coincidentes
-
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
-      const pixel2 = Jimp.intToRGBA(image2.getPixelColor(x, y));
-
-      if (
-        pixel1.r === pixel2.r &&
-        pixel1.g === pixel2.g &&
-        pixel1.b === pixel2.b &&
-        pixel1.a === pixel2.a
-      ) {
-        score++;
-        coordenadas.push({ x, y }); 
-      }
-    }
-  }
-
-  console.log(coordenadas[1]); 
-  console.log(score)
-  return score; 
-}
-
-async function getCoordenadasPuntosNegros(imagePath1) {
-  const image1 = await Jimp.read(imagePath1);
-
-  const width = image1.getWidth();
-  const height = image1.getHeight();
 
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
-
-
-      if (pixel1.r === 6 && pixel1.g === 6 && pixel1.b === 8) {
-        XandY_PuntosNegros.push({ x, y });
-      }
-    }
-  }
-
-  return XandY_PuntosNegros;
-}
-
-function findCommonElements(image1, comparador,width,height) {
+function findCommonElements(image1, comparador, width, height) {
   const puntosNegros = [];
 
   for (let y = 0; y < height; y++) {
@@ -92,13 +40,11 @@ async function crearImagen(imagePath, coordenadas) {
     image.setPixelColor(black, x, y);
   });
 
-  const outputImagePath = 'public/imagenFinal.png';
+  const outputImagePath = 'public/imagenFinalFinal.png';
   await image.writeAsync(outputImagePath);
 
   console.log(`Se agregaron píxeles negros a la imagen`);
 }
-
-
 
 /**
  * Funcion para verificar si los puntos x y y existen en el array dado
@@ -122,12 +68,25 @@ function generarNumeroAleatorio(min, max) {
  */
 function crearArray(width, height){
   let array = []
-  for (let i = 0; i < width; i++) {
-    array.push({ x: generarNumeroAleatorio(1, width), y: generarNumeroAleatorio(1, height) });
+
+  for (let i = 0; i < height; i++) {
+    for (let i = 0; i < width; i++) {
+      array.push({ x: generarNumeroAleatorio(1, width), y: generarNumeroAleatorio(1, height) });
+    }
   }
+
   return array
 }
 
+function contarSimilitudes(arrayObjetivo, individuo) {
+  let similitudes = 0;
+  for (let i = 0; i < individuo.length; i++) {
+    if (verificarCoordenadas(arrayObjetivo, individuo[i].x, individuo[i].y)) {
+      similitudes++;
+    }
+  }
+  return similitudes;
+}
 
 /**
  * Verifica quien es el mejor entre padre, madre e hijo
@@ -137,67 +96,67 @@ function crearArray(width, height){
  * @param {*} hijo 
  * @returns 
  */
-function best(arrayObjetivo,padre,madre,hijo){
+function best(arrayObjetivo, padre, madre, hijo) {
+  const similitudesPadre = contarSimilitudes(arrayObjetivo, padre);
+  const similitudesMadre = contarSimilitudes(arrayObjetivo, madre);
+  const similitudesHijo = contarSimilitudes(arrayObjetivo, hijo);
 
-  let mejorPadre = 0
-  let mejorMadre = 0
-  let mejorHijo = 0
-
-  for (let i = 0; i < padre.length; i++) {
-    if (verificarCoordenadas(arrayObjetivo, padre[i].x, padre[i].y)) {
-      mejorPadre++  
-    }
-  }
-  for (let i = 0; i < madre.length; i++) {
-    if (verificarCoordenadas(arrayObjetivo, madre[i].x, madre[i].y)) {
-      mejorMadre++  
-    }
-  }
-  for (let i = 0; i < hijo.length; i++) {
-    if (verificarCoordenadas(arrayObjetivo, hijo[i].x, hijo[i].y)) {
-      mejorHijo++  
-    }
-  }
-
-  // para obtener quien tuvo mas coincidencias
-  if (mejorPadre >= mejorMadre && mejorPadre >= mejorHijo) {      // padre mejor
+  if (similitudesPadre >= similitudesMadre && similitudesPadre >= similitudesHijo) {
     return padre;
-  } else if (mejorMadre > mejorPadre && mejorMadre > mejorHijo) { // madre mejor
+  } else if (similitudesMadre >= similitudesPadre && similitudesMadre >= similitudesHijo) {
     return madre;
-  } else {                                                        // hijo mejor
+  } else {
     return hijo;
   }
 }
 
+function crossover(padre, madre, width, numHijos, puntosNegros) {
+  let nuevosHijos = [];
 
-function crossover(padre, madre, width) {
-  let nuevoHijo = [];
+  for (let n = 0; n < numHijos; n++) {
+    let nuevoHijo = [];
 
-  for (let i = 0; i < width; i++) {
-    let aleatorio = Math.round(Math.random());
+    for (let i = 0; i < width; i++) {
+      let aleatorio = Math.round(Math.random());
 
-    if (aleatorio === 1) {
-      nuevoHijo.push({ x: padre[i].x, y: madre[i].y });
-    } else {
-      nuevoHijo.push({ x: madre[i].x, y: padre[i].y });
+      if (aleatorio === 1) {
+        nuevoHijo.push({ x: padre[i].x, y: padre[i].y });
+      } else {
+        nuevoHijo.push({ x: madre[i].x, y: madre[i].y });
+      }
+    }
+
+    nuevosHijos.push(nuevoHijo);
+  }
+
+  let mejorHijo = nuevosHijos[0];
+  let mejorFitness = contarSimilitudes(puntosNegros, mejorHijo);
+
+  for (let i = 1; i < nuevosHijos.length; i++) {
+    let fitness = contarSimilitudes(puntosNegros, nuevosHijos[i]);
+
+    if (fitness > mejorFitness) {
+      mejorHijo = nuevosHijos[i];
+      mejorFitness = fitness;
     }
   }
 
-  return nuevoHijo;
+  return mejorHijo;
 }
 
-function mutacion(arrayObjetivo, array, width, height){
 
+function mutacion(arrayObjetivo, array, width, height) {
   for (let i = 0; i < array.length; i++) {
-    if (!verificarCoordenadas(arrayObjetivo, array[0].x, array[0].y)) {// para no modificar valores buenos
-      let x = generarNumeroAleatorio(1, width)
-      let y = generarNumeroAleatorio(1, height)
-    
-      array[i].x = x
-      array[i].y = y
+    if (!verificarCoordenadas(arrayObjetivo, array[i].x, array[i].y)) {
+      if (Math.random() < tasaMutacion) {
+        let x = generarNumeroAleatorio(1, width);
+        let y = generarNumeroAleatorio(1, height);
+        array[i].x = x;
+        array[i].y = y;
+      }
     }
   }
-  return array
+  return array;
 }
 
 /**
@@ -219,8 +178,10 @@ function agregaPuntosNegros(puntosNegros, padre){
   return puntosNegrosFinal
 }
 
+
+
 async function runGeneticAlgorithm() {
-  //========================================================================================
+  //=================================================================================================================
   //CREAMOS LA VARIABLE PARA ALMACENAR LOS PUNTOS X y Y de la imagen del usuario
   const puntosNegros = []                      // array de la imagen del usuario
   const image1 = await Jimp.read(imagePath1);  // imagen del usuario
@@ -230,12 +191,13 @@ async function runGeneticAlgorithm() {
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+      //console.log(pixel1)
       if (pixel1.r === 6 && pixel1.g === 6 && pixel1.b === 8) {
         puntosNegros.push({ x, y });          // se agregan los puntos x y y donde van los puntos negros
       }
     }
   }
-  //========================================================================================
+  //================================================================================================================
   let comun = findCommonElements(image1, puntosNegros, width, height)  // almacena cuantos elementos tienen en comun
   let gen = 1
   let puntosNegrosFinal = [] // array para la creacion de la imagen
@@ -244,9 +206,9 @@ async function runGeneticAlgorithm() {
   //madre = [{x: 4, y: 6}]
   let padre = crearArray(width, height)
   let madre = crearArray(width, height)
-  let hijo = crossover(padre, madre)
+  let hijo = crossover(padre, madre, width, 10, puntosNegros) // 10, numero de hijos que se crean
 
-  while (gen <= 100){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
+  while (gen <= 20){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
 
     // si ya tienen los mismos elementos en comun, sale
     if(comun === findCommonElements(image1, puntosNegrosFinal, width, height)){
@@ -258,17 +220,17 @@ async function runGeneticAlgorithm() {
 
     padre = best(puntosNegros, padre, madre, hijo);
 
-    hijo = crossover(padre, madre);
+    hijo = crossover(padre, madre, width, 10, puntosNegros)
     hijo = mutacion(puntosNegros, hijo, width, height);
     madre = mutacion(puntosNegros, madre, width, height);
 
-    //console.log(puntosNegrosFinal)
-
-    //console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    console.log(gen)
     gen++ //generacion
   }
-
-  //crearImagen(imagePath, puntosNegrosFinal)
+  //console.log(findCommonElements(image1, puntosNegros, width, height))
+  console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
+  crearImagen(imagePath, puntosNegrosFinal)
 
   return
 }
