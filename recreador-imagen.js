@@ -1,10 +1,10 @@
 const Jimp = require('jimp');
 
-const generaciones = 10;
+const generaciones = 5;
 const tasaMutacion = 0.2; // 20% de los genes se mutarán
 
 //48672 es el numero de similitudes que estamos teniendo
-const imagePath1 = 'public/imagen_objetivo.png';  //imagen del usuario
+const imagePath1 = 'public/dibujolineal.jpg';  //imagen del usuario
 
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
 
@@ -12,16 +12,18 @@ const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen bla
 function findCommonElements(image1, comparador, width, height) {
   const puntosNegros = [];
 
+
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
-
-      if (pixel1.r === 6 && pixel1.g === 6 && pixel1.b === 8) {
+      const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
+  
+      
+      if (nivelGris <= 30) { // Si el nivel de gris es menor o igual a 30 / si cada codigo es 10 max
         puntosNegros.push({ x, y });
       }
     }
   }
-
   const commonElements = puntosNegros.filter(element => {
     return comparador.some(item => item.x === element.x && item.y === element.y);
   });
@@ -188,15 +190,20 @@ async function runGeneticAlgorithm() {
   const width = image1.getWidth();             // ancho
   const height = image1.getHeight();           // alto
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
-      //console.log(pixel1)
-      if (pixel1.r === 6 && pixel1.g === 6 && pixel1.b === 8) {
-        puntosNegros.push({ x, y });          // se agregan los puntos x y y donde van los puntos negros
-      }
+  
+
+for (let y = 0; y < height; y++) {
+  for (let x = 0; x < width; x++) {
+    const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+    const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
+
+    
+    if (nivelGris <= 30) { // Si el nivel de gris es menor o igual a 30 / si cada codigo es 10 max
+      puntosNegros.push({ x, y });
     }
   }
+}
+console.log(puntosNegros)
   //================================================================================================================
   let comun = findCommonElements(image1, puntosNegros, width, height)  // almacena cuantos elementos tienen en comun
   let gen = 1
@@ -228,7 +235,7 @@ async function runGeneticAlgorithm() {
     console.log(gen)
     gen++ //generacion
   }
-  //console.log(findCommonElements(image1, puntosNegros, width, height))
+  console.log(findCommonElements(image1, puntosNegros, width, height))
   console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
   crearImagen(imagePath, puntosNegrosFinal)
 
