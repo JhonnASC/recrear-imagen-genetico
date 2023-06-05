@@ -1,4 +1,4 @@
-const Jimp = require('jimp');
+import { intToRGBA, read, cssColorToHex } from 'jimp';
 
 const generaciones = 5;
 const tasaMutacion = 0.2; // 20% de los genes se mutarán
@@ -15,7 +15,7 @@ function findCommonElements(image1, comparador, width, height) {
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
-      const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+      const pixel1 = intToRGBA(image1.getPixelColor(x, y));
       const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
   
       
@@ -32,8 +32,8 @@ function findCommonElements(image1, comparador, width, height) {
 }
 
 async function crearImagen(imagePath, coordenadas) {
-  const image = await Jimp.read(imagePath);
-  const black = Jimp.cssColorToHex('#000000');
+  const image = await read(imagePath);
+  const black = cssColorToHex('#000000');
 
   //console.log(coordenadas)
 
@@ -186,7 +186,7 @@ async function runGeneticAlgorithm() {
   //=================================================================================================================
   //CREAMOS LA VARIABLE PARA ALMACENAR LOS PUNTOS X y Y de la imagen del usuario
   const puntosNegros = []                      // array de la imagen del usuario
-  const image1 = await Jimp.read(imagePath1);  // imagen del usuario
+  const image1 = await read(imagePath1);  // imagen del usuario
   const width = image1.getWidth();             // ancho
   const height = image1.getHeight();           // alto
 
@@ -194,7 +194,7 @@ async function runGeneticAlgorithm() {
 
 for (let y = 0; y < height; y++) {
   for (let x = 0; x < width; x++) {
-    const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+    const pixel1 = intToRGBA(image1.getPixelColor(x, y));
     const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
 
     
@@ -241,5 +241,3 @@ console.log(puntosNegros)
 
   return
 }
-
-runGeneticAlgorithm();
