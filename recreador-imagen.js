@@ -3,9 +3,9 @@
 ///////////////////////////////////////////////////
 const Jimp = require('jimp');
 
-const maxGeneraciones = 300; //cantidad de generaciones
+const maxGeneraciones = 70; //cantidad de generaciones
 const tasaMutacion = 0.2;    //20% de los genes se mutarán
-const tasaCombinacion = 0;  //cantidad de combinados
+const tasaCombinacion = 0.5;  //cantidad de combinados
 const hijosPorGen = 10;     //cantidad de hijos por generación
 
 //48672 es el numero de similitudes que estamos teniendo
@@ -153,7 +153,8 @@ function best(arrayObjetivo, padre, madre, hijo) {
 function crossover(padre, madre, width, numHijos, puntosNegros) {
   let nuevosHijos = [];
 
-  for (let n = 0; n < numHijos; n++) {
+  //for (let n = 0; (n < numHijos) && (n <= numHijos*tasaCombinacion) ; n++) {
+    for (let n = 0; n <= numHijos*tasaCombinacion ; n++) {
     let nuevoHijo = [];
 
     for (let i = 0; i < width; i++) {
@@ -219,10 +220,8 @@ function agregaPuntosNegros(puntosNegros, padre){
       puntosNegrosFinal.push({ x: padre[i].x, y: padre[i].y });
     }
   }
-
   return puntosNegrosFinal
 }
-
 
 /**
  * Main del programa.
