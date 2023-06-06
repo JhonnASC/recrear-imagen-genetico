@@ -3,14 +3,18 @@
 ///////////////////////////////////////////////////
 const Jimp = require('jimp');
 
-const maxGeneraciones = 70; //cantidad de generaciones
+//Variables para el Algoritmo Genético
+const maxGeneraciones = 10; //cantidad de generaciones
 const tasaMutacion = 0.2;    //20% de los genes se mutarán
 const tasaCombinacion = 0.5;  //cantidad de combinados
 const hijosPorGen = 10;     //cantidad de hijos por generación
 
-//48672 es el numero de similitudes que estamos teniendo
-//const imagePath1 = 'public/dibujolineal.jpg';  //imagen del usuario
-const imagePath1 = 'public/calavera.jpeg';  //imagen del usuario
+//Variables de tiempo
+var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
+var tPromPorGen = 0;        //tiempo promedio entre generaciones
+
+//Variables para trabajar las imagenes
+const imagePath1 = 'public/calavera.jpeg';       //imagen del usuario
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
 
 ///////////////////////////////////////////////////
@@ -72,7 +76,7 @@ async function crearImagen(imagePath, coordenadas) {
  * @param {array} coordenadas array en donde vamos a comprobar
  * @param {number} x coordenada x
  * @param {number} y coordenada y
- * @returns 
+ * @returns true en caso de que las coordenadas existan y false lo contrario
  */
 function verificarCoordenadas(coordenadas, x, y) {
   return coordenadas.some(coordenada => coordenada.x === x && coordenada.y === y);
@@ -92,7 +96,7 @@ function generarNumeroAleatorio(min, max) {
  * Crea un array con valores aleatorios para x && y utilizando el ancho y alto de la imagen
  * @param {number} width es el ancho de la imagen
  * @param {number} height es el alto de la imagen
- * @param returns el array creado con su alto y ancho
+ * @returns el array creado con su alto y ancho
  */
 function crearArray(width, height){
   let array = [];
@@ -105,9 +109,10 @@ function crearArray(width, height){
 }
 
 /**
+ * Cuenta la cantidad de individuos iguales que hay en un arreglo objetivo
  * @param {array} arrayObjetivo array en donde buscaremos
  * @param {{x, y}} individuo coordenada del punto a comparar
- * @param returns cantidad de similitudes
+ * @returns cantidad de similitudes
  */
 function contarSimilitudes(arrayObjetivo, individuo) {
   let similitudes = 0;
@@ -227,6 +232,9 @@ function agregaPuntosNegros(puntosNegros, padre){
  * Main del programa.
  */
 async function runGeneticAlgorithm() {
+  //Medimos el tiempo total
+  let inicio = Date.now();
+
   //=================================================================================================================
   //CREAMOS LA VARIABLE PARA ALMACENAR LOS PUNTOS X y Y de la imagen del usuario
   const puntosNegros = []                      // array de la imagen del usuario
@@ -261,6 +269,9 @@ console.log(puntosNegros)
   //let hijo = crossover(padre, madre, width, 10, puntosNegros) // 10, numero de hijos que se crean
   let hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros) // 10, numero de hijos que se crean
 
+  //Para calcular el tempo promedio entre generaciones
+  let inicioTPorGeneracion = Date.now();
+  
   while (gen <= maxGeneraciones){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
 
     // si ya tienen los mismos elementos en comun, sale
@@ -273,18 +284,34 @@ console.log(puntosNegros)
 
     padre = best(puntosNegros, padre, madre, hijo);
 
-    //hijo = crossover(padre, madre, width, 10, puntosNegros)
     hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros)
     hijo = mutacion(puntosNegros, hijo, width, height);
     madre = mutacion(puntosNegros, madre, width, height);
 
-    console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
     console.log(gen)
+
+    //Primero sumamos los tiempos de cada generación
+    tPromPorGen += Date.now() - inicioTPorGeneracion;
+    //Actualizamos el tiempo de inicio antes de la nueva generacion
+    inicioTPorGeneracion = Date.now();
+
     gen++ //generacion
   }
+  //Sacamos el promedio dividiendo entre la cantidad de generaciones
+  tPromPorGen = (tPromPorGen / maxGeneraciones) / 1000; //de milisegundos a segundos
+
   console.log(findCommonElements(image1, puntosNegros, width, height))
   console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
   crearImagen(imagePath, puntosNegrosFinal)
+
+  //Medimos el tiempo total
+  let final = Date.now();
+  tiempoTotal = (final - inicio) / 1000; //de milisegundos a segundos
+
+  console.log("El tiempo total es", tiempoTotal, "segundos.");
+  console.log("El tiempo promedio por generacion es", tPromPorGen, "segundos.")
 
   return
 }
