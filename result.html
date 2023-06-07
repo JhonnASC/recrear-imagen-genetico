@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Procesador de Imágenes - Resultado</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="recreador-imagen.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -31,6 +35,10 @@
       display: block;
       margin: 20px auto;
     }
+    #grafico-lineal {
+        width: 800px;
+        height: 400px;
+    }
   </style>
 </head>
 <body>
@@ -40,9 +48,42 @@
   <h2>Imagen final:</h2>
   <img src="/imagenFinalFinal.png" alt="Imagen final">
   
-  <form id="verGraficosForm" action="/ver-grafico" method="post" enctype="multipart/form-data">
-    <button type="submit">Ver gráficos</button>
-  </form>
+  <h2>Grafico:</h2>
+
+  <canvas id="grafico-lineal"></canvas>
+
+  <button id="actualizar-btn">Actualizar Gráfico</button>
+
+  <script>
+    // Datos iniciales del gráfico
+    let data = {
+      labels: [],           // Etiquetas del eje x
+      datasets: [{
+        label: "Variable", // Etiqueta de la serie de datos
+        data: [],         // Valores de la serie de datos
+        borderColor: "rgba(75, 192, 192, 1)", // Color del borde de la línea
+        backgroundColor: "rgba(75, 192, 192, 0.2)", // Color de fondo del área bajo la línea
+        fill: true        // Rellenar el área bajo la línea
+      }]
+    };
+
+    // Opciones del gráfico
+    const options = {
+      scales: {
+        y: {
+          beginAtZero: true // Empezar el eje y desde cero
+        }
+      }
+    };
+
+    // Agregar el evento de clic al botón para llamar a la función actualizarGrafico()
+    document.getElementById("actualizar-btn").addEventListener("click", function() {
+      actualizarGrafico();
+    });
+
+
+  </script>
+  
 
 </body>
 </html>

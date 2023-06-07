@@ -8,10 +8,10 @@ const tasaMutacion = 0.2;    //20% de los genes se mutarán
 const tasaCombinacion = 0.5;  //cantidad de combinados
 const hijosPorGen = 10;     //cantidad de hijos por generación
 
-//48672 es el numero de similitudes que estamos teniendo
 //const imagePath1 = 'public/dibujolineal.jpg';  //imagen del usuario
 const imagePath1 = 'public/calavera.jpeg';  //imagen del usuario
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
+
 
 ///////////////////////////////////////////////////
 //     IMPLEMENTACION PARA CARGAR LA IMAGEN      //
@@ -223,9 +223,10 @@ function agregaPuntosNegros(puntosNegros, padre){
   return puntosNegrosFinal
 }
 
-/**
+
+/**====================================================================
  * Main del programa.
- */
+ =====================================================================*/
 async function runGeneticAlgorithm() {
   //=================================================================================================================
   //CREAMOS LA VARIABLE PARA ALMACENAR LOS PUNTOS X y Y de la imagen del usuario
@@ -233,32 +234,27 @@ async function runGeneticAlgorithm() {
   const image1 = await Jimp.read(imagePath1);  // imagen del usuario
   const width = image1.getWidth();             // ancho
   const height = image1.getHeight();           // alto
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+      const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
 
-  
-
-for (let y = 0; y < height; y++) {
-  for (let x = 0; x < width; x++) {
-    const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
-    const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
-
-    
-    if (nivelGris <= 30) { // Si el nivel de gris es menor o igual a 30 / si cada codigo es 10 max
-      puntosNegros.push({ x, y });
+      
+      if (nivelGris <= 30) { // Si el nivel de gris es menor o igual a 30 / si cada codigo es 10 max
+        puntosNegros.push({ x, y });
+      }
     }
   }
-}
-console.log(puntosNegros)
+  //console.log(puntosNegros)
+
   //================================================================================================================
   let comun = findCommonElements(image1, puntosNegros, width, height)  // almacena cuantos elementos tienen en comun
   let gen = 1
   let puntosNegrosFinal = [] // array para la creacion de la imagen
 
-  //padre = [{x: 3, y: 3}]  este es el formato
-  //madre = [{x: 4, y: 6}]
   //Poblacion inicial
   let padre = crearArray(width, height)
   let madre = crearArray(width, height)
-  //let hijo = crossover(padre, madre, width, 10, puntosNegros) // 10, numero de hijos que se crean
   let hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros) // 10, numero de hijos que se crean
 
   while (gen <= maxGeneraciones){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
@@ -278,15 +274,39 @@ console.log(puntosNegros)
     hijo = mutacion(puntosNegros, hijo, width, height);
     madre = mutacion(puntosNegros, madre, width, height);
 
-    console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
-    console.log(gen)
-    gen++ //generacion
-  }
-  console.log(findCommonElements(image1, puntosNegros, width, height))
-  console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
-  crearImagen(imagePath, puntosNegrosFinal)
+    //console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
 
-  return
+    gen++ //generacion
+
+  }
+  
+
+  //crearImagen(imagePath, puntosNegrosFinal)
+
+  return 
+}
+
+
+function actualizarGrafico() {
+  let valor = Math.random() * 10; // Genera un nuevo valor aleatorio
+
+  // Actualizar los datos
+  data.labels.push(data.labels.length + 1); // Agregar una nueva etiqueta en el eje x
+  data.datasets[0].data.push(valor); // Agregar un nuevo valor en la serie de datos
+
+  // Crear o actualizar el gráfico
+  if (window.graficoLineal) {
+    window.graficoLineal.update(); // Actualizar el gráfico existente
+  } else {
+    const ctx = document.getElementById("grafico-lineal").getContext("2d");
+    window.graficoLineal = new Chart(ctx, {
+      type: "line", // Tipo de gráfico lineal
+      data: data,
+      options: options
+    });
+  }
 }
 
 runGeneticAlgorithm();
+
+
