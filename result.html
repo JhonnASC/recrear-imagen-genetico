@@ -26,6 +26,11 @@
       max-width: 100%;
       height: auto;
     }
+
+    canvas {
+      display: block;
+      margin: 20px auto;
+    }
   </style>
 </head>
 <body>
@@ -34,5 +39,10 @@
   <img src="/imagen_objetivo.png" alt="Imagen objetivo">
   <h2>Imagen final:</h2>
   <img src="/imagenFinalFinal.png" alt="Imagen final">
+  
+  <form id="verGraficosForm" action="/ver-grafico" method="post" enctype="multipart/form-data">
+    <button type="submit">Ver gráficos</button>
+  </form>
+
 </body>
 </html>

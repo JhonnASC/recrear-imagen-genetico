@@ -5,9 +5,9 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
       padding: 20px;
       margin: 0;
+
     }
     
     h1 {
@@ -27,8 +27,19 @@
     
     input[type="file"] {
       display: block;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       width: 100%;
+    }
+    
+    input[type="number"],
+    input[type="text"] {
+      display: block;
+      margin-bottom: 10px;
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cccccc;
+      border-radius: 4px;
+      box-sizing: border-box;
     }
     
     input[type="submit"] {
@@ -51,6 +62,10 @@
   <h1>Procesador de Imágenes</h1>
   <form id="imageForm" action="/process-image" method="post" enctype="multipart/form-data">
     <input type="file" name="image" accept="image/png, image/jpeg">
+    <input type="number" name="maxGeneraciones" placeholder="Max. Generaciones">
+    <input type="text" name="tasaMutacion" placeholder="Tasa de Mutación (%)">
+    <input type="text" name="tasaCombinacion" placeholder="Tasa de Combinación (%)">
+    <input type="number" name="hijosPorGen" placeholder="Hijos por Generación">
     <input type="submit" value="Procesar Imagen">
   </form>
 </body>
