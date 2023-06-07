@@ -7,7 +7,12 @@ const Jimp = require('jimp');
 const maxGeneraciones = 10; //cantidad de generaciones
 const tasaMutacion = 0.2;    //20% de los genes se mutarán
 const tasaCombinacion = 0.5;  //cantidad de combinados
+
+//const 
+
 const hijosPorGen = 10;     //cantidad de hijos por generación
+var fitnessPromedio = 0;
+var mejorFitnessPorGen = [];
 
 //Variables de tiempo
 var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
@@ -138,10 +143,13 @@ function best(arrayObjetivo, padre, madre, hijo) {
   const similitudesHijo = contarSimilitudes(arrayObjetivo, hijo);
 
   if (similitudesPadre >= similitudesMadre && similitudesPadre >= similitudesHijo) {
+    fitnessPromedio += similitudesPadre;
     return padre;
   } else if (similitudesMadre >= similitudesPadre && similitudesMadre >= similitudesHijo) {
+    fitnessPromedio += similitudesMadre;
     return madre;
   } else {
+    fitnessPromedio += similitudesHijo;
     return hijo;
   }
 }
@@ -159,7 +167,7 @@ function crossover(padre, madre, width, numHijos, puntosNegros) {
   let nuevosHijos = [];
 
   //for (let n = 0; (n < numHijos) && (n <= numHijos*tasaCombinacion) ; n++) {
-    for (let n = 0; n <= numHijos*tasaCombinacion ; n++) {
+  for (let n = 0; n <= numHijos*tasaCombinacion ; n++) {
     let nuevoHijo = [];
 
     for (let i = 0; i < width; i++) {
@@ -266,7 +274,6 @@ console.log(puntosNegros)
   //Poblacion inicial
   let padre = crearArray(width, height)
   let madre = crearArray(width, height)
-  //let hijo = crossover(padre, madre, width, 10, puntosNegros) // 10, numero de hijos que se crean
   let hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros) // 10, numero de hijos que se crean
 
   //Para calcular el tempo promedio entre generaciones
@@ -283,6 +290,7 @@ console.log(puntosNegros)
     puntosNegrosFinal = agregaPuntosNegros(puntosNegros, padre);
 
     padre = best(puntosNegros, padre, madre, hijo);
+    mejorFitnessPorGen.push(padre);
 
     hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros)
     hijo = mutacion(puntosNegros, hijo, width, height);
@@ -299,7 +307,10 @@ console.log(puntosNegros)
 
     gen++ //generacion
   }
-  //Sacamos el promedio dividiendo entre la cantidad de generaciones
+  //Sacamos el fitness promedio dividiendo entre la cantidad de generaciones
+  fitnessPromedio = fitnessPromedio / maxGeneraciones;
+
+  //Sacamos el tiempo promedio dividiendo entre la cantidad de generaciones
   tPromPorGen = (tPromPorGen / maxGeneraciones) / 1000; //de milisegundos a segundos
 
   console.log(findCommonElements(image1, puntosNegros, width, height))
