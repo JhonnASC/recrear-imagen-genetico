@@ -8,7 +8,7 @@ const imagePath1 = 'public/calavera.jpeg';       //imagen del usuario
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
 
 //Variables para el Algoritmo Genético
-const maxGeneraciones = 50; //cantidad de generaciones
+const maxGeneraciones = 1000; //cantidad de generaciones
 const tasaMutacion = 0.3;    //20% de los genes se mutarán
 const tasaCombinacion = 0.3;  //cantidad de combinados
 const tasaSeleccion = 0.4;  //cantidad de hijos que pasan a la otra generacion
@@ -129,20 +129,20 @@ function contarSimilitudes(arrayObjetivo, individuo) {
  * @param {[{x, y}, ...]} hijo coordenadas del hijo
  * @returns el mejor de los comparados para guardarlo como nuevo padre
  */
-function best(arrayObjetivo, padre, madre, hijo) {
+function best(arrayObjetivo, padre, madre, hijo, fitnessPromedio) {
   const similitudesPadre = contarSimilitudes(arrayObjetivo, padre);
   const similitudesMadre = contarSimilitudes(arrayObjetivo, madre);
   const similitudesHijo = contarSimilitudes(arrayObjetivo, hijo);
 
   if (similitudesPadre >= similitudesMadre && similitudesPadre >= similitudesHijo) {
-    fitnessPromedio += similitudesPadre;
-    return padre;
+    //fitnessPromedio += similitudesPadre;
+    return padre,fitnessPromedio;
   } else if (similitudesMadre >= similitudesPadre && similitudesMadre >= similitudesHijo) {
-    fitnessPromedio += similitudesMadre;
-    return madre;
+    //fitnessPromedio += similitudesMadre;
+    return madre,fitnessPromedio;
   } else {
-    fitnessPromedio += similitudesHijo;
-    return hijo;
+    //fitnessPromedio += similitudesHijo;
+    return hijo,fitnessPromedio;
   }
 }
 
@@ -276,17 +276,17 @@ async function runGeneticAlgorithm() {
   var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
   var tPromPorGen = 0;        //tiempo promedio entre generaciones
 
-for (let y = 0; y < height; y++) {
-  for (let x = 0; x < width; x++) {
-    const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
-    const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const pixel1 = Jimp.intToRGBA(image1.getPixelColor(x, y));
+      const nivelGris = (pixel1.r + pixel1.g + pixel1.b) / 3; // Promedio de los rgb
 
-    
-    if (nivelGris <= 30) { // Si el nivel de gris es menor o igual a 30 / si cada codigo es 10 max
-      puntosNegros.push({ x, y });
+      
+      if (nivelGris <= 30) { // Si el nivel de gris es menor o igual a 30 / si cada codigo es 10 max
+        puntosNegros.push({ x, y });
+      }
     }
   }
-}
 
   //================================================================================================================
   let comun = findCommonElements(image1, puntosNegros, width, height)  // almacena cuantos elementos tienen en comun
@@ -405,10 +405,12 @@ for (let y = 0; y < height; y++) {
       if (fitnessPorHijo > mejorFitness) {
         mejorFitness = fitnessPorHijo;
         padre = generacion[i];
-        console.log(generacion[i])
+        //console.log(generacion[i])
       }
     }
     mejorFitnessPorGen.push(mejorFitness);
+
+    padre,fitnessPromedio = best(puntosNegros, padre, madre, generacion[0], fitnessPromedio);
 
     /* 
     let mejorHijo = nuevosHijos[0];
@@ -434,7 +436,8 @@ for (let y = 0; y < height; y++) {
     inicioTPorGeneracion = Date.now();
 
     gen++ //generacion
-  }
+  }//end while
+
   //Sacamos el fitness promedio dividiendo entre la cantidad de generaciones
   fitnessPromedio = fitnessPromedio / maxGeneraciones;
   console.log("El fitness promedio es:", fitnessPromedio)
