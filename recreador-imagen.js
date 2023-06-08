@@ -8,23 +8,10 @@ const imagePath1 = 'public/calavera.jpeg';       //imagen del usuario
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
 
 //Variables para el Algoritmo Genético
-const maxGeneraciones = 13; //cantidad de generaciones
-const tasaMutacion = 0.2;    //20% de los genes se mutarán
-const tasaCombinacion = 0.5;  //cantidad de combinados
-const tasaSeleccion = 0.3;  //cantidad de hijos que pasan a la otra generacion
-var hijosPorGen = 13;     //cantidad de hijos por generación
-var fitnessPromedio = 0;
-var mejorFitnessPorGen = [];
-var selection = [];
-var mutation = [];
-var hijosMutados =[];
-var combination = [];
-var hijosDeCombinacion = [];
-
-//Variables de tiempo
-var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
-var tPromPorGen = 0;        //tiempo promedio entre generaciones
-
+const maxGeneraciones = 50; //cantidad de generaciones
+const tasaMutacion = 0.3;    //20% de los genes se mutarán
+const tasaCombinacion = 0.3;  //cantidad de combinados
+const tasaSeleccion = 0.4;  //cantidad de hijos que pasan a la otra generacion
 
 ///////////////////////////////////////////////////
 //     IMPLEMENTACION PARA CARGAR LA IMAGEN      //
@@ -172,7 +159,7 @@ function crearGeneracion(padre, madre, width, numHijos, puntosNegros) {
   let nuevosHijos = [];
 
   //for (let n = 0; (n < numHijos) && (n <= numHijos*tasaCombinacion) ; n++) {
-  for (let n = 0; n <= numHijos ; n++) {
+  for (let n = 0; n < numHijos ; n++) {
     let nuevoHijo = [];
 
     for (let i = 0; i < width; i++) {
@@ -211,8 +198,8 @@ function crearGeneracion(padre, madre, width, numHijos, puntosNegros) {
  */
 function crossOver(padre, madre) {
   let nuevoHijo = [];
-  let aleatorio = Math.round(Math.random()); //redondea al entero mas cercano, un numero que se genera ente 0 y 1
   for (let i = 0; i < padre.length; i++) {
+    let aleatorio = Math.round(Math.random()); //redondea al entero mas cercano, un numero que se genera ente 0 y 1
     if (aleatorio === 1) {
       nuevoHijo.push(padre[i]);
     }else{
@@ -276,7 +263,18 @@ async function runGeneticAlgorithm() {
   const width = image1.getWidth();             // ancho
   const height = image1.getHeight();           // alto
 
-  
+  var hijosPorGen = 50;     //cantidad de hijos por generación
+  var fitnessPromedio = 0;  
+  var mejorFitnessPorGen = [];
+  var selection = []; //hijos que son el porcentaje de seleccion, para dejarlos para la proxima generacion
+  var mutation = [];  //hijos que son el porcentaje de mutacion, para mutarlos
+  var hijosMutados =[]; //los hijos mutados
+  var combination = []; //hijos que son el porcentaje de combination, para combinarlos
+  var hijosDeCombinacion = [];  //los hijos combinados
+
+  //Variables de tiempo
+  var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
+  var tPromPorGen = 0;        //tiempo promedio entre generaciones
 
 for (let y = 0; y < height; y++) {
   for (let x = 0; x < width; x++) {
@@ -289,7 +287,7 @@ for (let y = 0; y < height; y++) {
     }
   }
 }
-console.log(puntosNegros)
+
   //================================================================================================================
   let comun = findCommonElements(image1, puntosNegros, width, height)  // almacena cuantos elementos tienen en comun
   let gen = 1
@@ -300,7 +298,7 @@ console.log(puntosNegros)
   //Poblacion inicial
   let padre = crearArray(width, height)
   let madre = crearArray(width, height)
-  //let hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros) // 10, numero de hijos que se crean
+
   //Formato de la generacion:  [ [{x,y}, {x,y}, {x,y}, {x,y}], [{x,y}, {x,y}, {x,y}, {x,y}], ... ]
   let generacion = crearGeneracion(padre, madre, width, hijosPorGen, puntosNegros);
 
@@ -318,8 +316,8 @@ console.log(puntosNegros)
     cantSelec += hijosPorGen - (cantSelec + cantMut + cantComb);
   }
 
-
-  while (gen <= maxGeneraciones){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
+  // realizamos el ciclo para intentar recrear la imagen de manera genetica
+  while (gen <= maxGeneraciones){
 
     // si ya tienen los mismos elementos en comun, sale
     if(comun === findCommonElements(image1, puntosNegrosFinal, width, height)){
@@ -328,19 +326,8 @@ console.log(puntosNegros)
     }
 
     puntosNegrosFinal = agregaPuntosNegros(puntosNegros, padre);
-/* 
-    padre = best(puntosNegros, padre, madre, hijo);
-    mejorFitnessPorGen.push(padre);
-
-    hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros)
-    hijo = mutacion(puntosNegros, hijo, width, height);
-    madre = mutacion(puntosNegros, madre, width, height);
- */
 
     var copiahijosPorGen = hijosPorGen;
-
-    //let indiceCiclos = hijosPorGen - 1;
-    console.log("hijos antes de ciclos:", copiahijosPorGen);
 
     //Para sacar la cantidad de seleccionados
     for (let i = 0; i < cantSelec; i++) {
@@ -353,10 +340,7 @@ console.log(puntosNegros)
       if (i === (cantSelec - 1)) {  //Valida si estamos en el ultimo ciclo
         //actualizamos la cantidad de hijos en el ultimo ciclo,
         //para usar la cantidad como intervalo en el proximo ciclo
-        copiahijosPorGen -= i;
-
-        console.log("Quedan", copiahijosPorGen, "hijos en el ciclo", i, "de seleccion")
-
+        copiahijosPorGen -= cantSelec;
       }
     }
 
@@ -371,10 +355,7 @@ console.log(puntosNegros)
       if (i === (cantMut - 1)) {  //Valida si estamos en el ultimo ciclo
         //actualizamos la cantidad de hijos en el ultimo ciclo,
         //para usar la cantidad como intervalo en el proximo ciclo
-        copiahijosPorGen -= i;
-
-        console.log("Quedan", copiahijosPorGen, "hijos en el ultimo ciclo de mutacion"); // en teoria seria 1 en el ultimo ciclo
-
+        copiahijosPorGen -= cantMut;
       }
     }
 
@@ -387,19 +368,13 @@ console.log(puntosNegros)
       //Le decimos que borre ese hijo de la generacion
       generacion.splice(generacion.indexOf(hijo), 1)
       if (i === (cantComb - 1)) {  //Valida si estamos en el ultimo ciclo
-
-        console.log("Quedan", copiahijosPorGen - i, "hijos en el ultimo ciclo de combinacion"); // en teoria seria 1 en el ultimo ciclo
-
+        copiahijosPorGen -= cantComb;
       }
     }
-
     generacion = []; //se limpia para meter los hijos trabajados luego
 
     //-----------Vamos a mutar todos los hijos del porcentaje que es para mutacion-----------
     for (let i = 0; i < mutation.length; i++) {
-
-      //console.log("en la posicion", i, "de la lista mutation esta", mutation[i])
-
       hijosMutados.push(mutacion(puntosNegros, mutation[i], width, height));
     }
 
@@ -407,13 +382,6 @@ console.log(puntosNegros)
     while (true) {
       let random1 = generarNumeroAleatorio(0, combination.length - 1);
       let random2 = generarNumeroAleatorio(0, combination.length - 1);
-
-      console.log("En la posicon random1 hay", combination[random1]);
-      console.log("En la posicon random2 hay", combination[random2]);
-
-      console.log("Tamanno de combination:",combination.length, "el random1 es:", random1)
-      console.log("Tamanno de combination:",combination.length, "el random2 es:", random2)
-
       hijosDeCombinacion.push(crossOver(combination[random1], combination[random2]));
       //Cuando ya halla la misma cantidad de hijos (producto de la combinacion) que
       //los padres(la lista con el porcentaje de hijos para combinar) se termina de combinar
@@ -422,10 +390,7 @@ console.log(puntosNegros)
       }
     }
 
-    //const c = [...array, ...array2]
     generacion = [...selection, ...hijosMutados, ...hijosDeCombinacion];
-
-    console.log("En generacion hay", generacion.length, "elementos")
 
     //Se limpian las listas para la proxima generacion
     selection = [];
@@ -433,16 +398,31 @@ console.log(puntosNegros)
     hijosMutados =[]
     combination = [];
     hijosDeCombinacion = [];
-    console.log("Cantidad de hijos:", generacion.length);
 
     let mejorFitness = 0
     for (let i = 0; i < generacion.length; i++) {
       fitnessPorHijo = contarSimilitudes(puntosNegros, generacion[i]);
       if (fitnessPorHijo > mejorFitness) {
         mejorFitness = fitnessPorHijo;
+        padre = generacion[i];
+        console.log(generacion[i])
       }
     }
     mejorFitnessPorGen.push(mejorFitness);
+
+    /* 
+    let mejorHijo = nuevosHijos[0];
+    let mejorFitness = contarSimilitudes(puntosNegros, mejorHijo);
+
+    for (let i = 1; i < nuevosHijos.length; i++) {
+      let fitness = contarSimilitudes(puntosNegros, nuevosHijos[i]);
+      if (fitness > mejorFitness) {
+        mejorHijo = nuevosHijos[i];
+        mejorFitness = fitness;
+      }
+    }
+
+    return mejorHijo; */
 
     // imprime las similitudes que tenga la imagen del usuario y la imagen final
     console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
@@ -457,6 +437,7 @@ console.log(puntosNegros)
   }
   //Sacamos el fitness promedio dividiendo entre la cantidad de generaciones
   fitnessPromedio = fitnessPromedio / maxGeneraciones;
+  console.log("El fitness promedio es:", fitnessPromedio)
 
   //Sacamos el tiempo promedio dividiendo entre la cantidad de generaciones
   tPromPorGen = (tPromPorGen / maxGeneraciones) / 1000; //de milisegundos a segundos
