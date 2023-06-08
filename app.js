@@ -10,6 +10,8 @@ const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen bla
 const fs = require('fs');
 
 
+
+
 app.use(fileUpload());
 app.use(express.static('public'));
 
@@ -17,10 +19,8 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/ver-grafico', (req, res) => {
-
-  console.log("hola satanas2")
-  res.sendFile(path.join(__dirname, 'index.html'));
+app.post('/ver-stats', (req, res) => {
+  res.sendFile(path.join(__dirname, 'grafico.html'));
 });
 
 

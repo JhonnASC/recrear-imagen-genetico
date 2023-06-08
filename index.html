@@ -7,11 +7,13 @@
       font-family: Arial, sans-serif;
       padding: 20px;
       margin: 0;
-
+      background-image: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzA4YmMzZmY2MzIyOWFlZjIxNDkwNDZlMWYwNzU4ZWNkMmIzODA1NiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/QTfa8EZ9dQAHzF4e06/giphy.gif");
+      background-repeat: no-repeat;
+      background-size: cover;
     }
     
     h1 {
-      color: #333333;
+      color: #1f1e1e;
       text-align: center;
     }
     
@@ -43,7 +45,7 @@
     }
     
     input[type="submit"] {
-      background-color: #4CAF50;
+      background-color: #353a35;
       color: white;
       padding: 10px 20px;
       border: none;
@@ -54,19 +56,35 @@
     }
     
     input[type="submit"]:hover {
-      background-color: #45a049;
+      background-color: #344ac4;
     }
   </style>
+  <script>
+    function validateForm() {
+      var tasaMutacion = parseFloat(document.getElementById('tasaMutacion').value);
+      var tasaCombinacion = parseFloat(document.getElementById('tasaCombinacion').value);
+      var parametroFaltante = parseFloat(document.getElementById('parametroFaltante').value);
+      
+      if (tasaMutacion + tasaCombinacion + parametroFaltante !== 1) {
+        alert("La suma de las tasas debe ser igual a 1");
+        return false;
+      }
+      
+      return true;
+    }
+  </script>
 </head>
 <body>
-  <h1>Procesador de Imágenes</h1>
-  <form id="imageForm" action="/process-image" method="post" enctype="multipart/form-data">
+  <h1>Recreador de Imágenes</h1>
+  <form id="imageForm" action="/process-image" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
     <input type="file" name="image" accept="image/png, image/jpeg">
     <input type="number" name="maxGeneraciones" placeholder="Max. Generaciones">
-    <input type="text" name="tasaMutacion" placeholder="Tasa de Mutación (%)">
-    <input type="text" name="tasaCombinacion" placeholder="Tasa de Combinación (%)">
+    <input type="text" name="tasaMutacion" id="tasaMutacion" placeholder="Tasa de Mutación (%)">
+    <input type="text" name="tasaCombinacion" id="tasaCombinacion" placeholder="Tasa de Combinación (%)">
+    <input type="text" name="parametroFaltante" id="parametroFaltante" placeholder="falta este">
     <input type="number" name="hijosPorGen" placeholder="Hijos por Generación">
     <input type="submit" value="Procesar Imagen">
   </form>
 </body>
 </html>
+

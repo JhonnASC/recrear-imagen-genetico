@@ -10,39 +10,50 @@
       margin: 0;
     }
 
-    h1 {
-      color: #333333;
-      text-align: center;
-    }
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
 
-    h2 {
-      color: #666666;
-      margin-top: 20px;
-    }
+h1 {
+  color: #333333;
+  margin-bottom: 20px;
+}
 
-    img {
-      display: block;
-      margin: 20px auto;
-      max-width: 100%;
-      height: auto;
-    }
+h2 {
+  color: #666666;
+  margin-top: 40px;
+}
 
-    canvas {
-      display: block;
-      margin: 20px auto;
-    }
+.image-container {
+  margin: 40px auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
   </style>
+  <script>
+    function recargarImagen() {
+      var imagen = document.getElementById("imagen-final");
+      imagen.src = "/imagenFinalFinal.png";
+    }
+setInterval(recargarImagen, 1000); // Actualizar cada 3 segundos
+  </script>
 </head>
 <body>
-  <h1>Procesador de Imágenes</h1>
-  <h2>Imagen objetivo:</h2>
-  <img src="/imagen_objetivo.png" alt="Imagen objetivo">
-  <h2>Imagen final:</h2>
-  <img src="/imagenFinalFinal.png" alt="Imagen final">
-  
-  <form id="verGraficosForm" action="/ver-grafico" method="post" enctype="multipart/form-data">
-    <button type="submit">Ver gráficos</button>
-  </form>
-
+  <div class="container">
+    <h1>Procesador de Imágenes</h1>
+    <h2>Imagen objetivo:</h2>
+    <div class="image-container">
+      <img src="/imagen_objetivo.png" alt="Imagen objetivo">
+    </div>
+    <h2>Imagen final:</h2>
+    <div class="image-container">
+      <img id="imagen-final" src="/imagenFinalFinal.png" alt="Imagen final">
+    </div>
+  </div>
 </body>
 </html>

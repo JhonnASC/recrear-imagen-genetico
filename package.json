@@ -2,7 +2,8 @@
   "dependencies": {
     "express": "^4.18.2",
     "express-fileupload": "^1.4.0",
-    "jimp": "^0.22.8"
+    "jimp": "^0.22.8",
+    "jsdom": "^22.1.0"
   },
   "name": "recrear-imagen-genetico",
   "description": "",
