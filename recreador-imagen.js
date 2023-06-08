@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////
 const Jimp = require('jimp');
 
-const maxGeneraciones = 70; //cantidad de generaciones
+const maxGeneraciones = 10; //cantidad de generaciones
 const tasaMutacion = 0.2;    //20% de los genes se mutarán
 const tasaCombinacion = 0.5;  //cantidad de combinados
 const hijosPorGen = 10;     //cantidad de hijos por generación
@@ -228,6 +228,11 @@ function agregaPuntosNegros(puntosNegros, padre){
  * Main del programa.
  =====================================================================*/
 async function runGeneticAlgorithm() {
+  //Medimos el tiempo total
+  let inicio = Date.now();
+ //Variables de tiempo
+  var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
+  var tPromPorGen = 0;  
   //=================================================================================================================
   //CREAMOS LA VARIABLE PARA ALMACENAR LOS PUNTOS X y Y de la imagen del usuario
   const puntosNegros = []                      // array de la imagen del usuario
@@ -258,7 +263,9 @@ async function runGeneticAlgorithm() {
   let hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros) // 10, numero de hijos que se crean
 
   while (gen <= maxGeneraciones){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
-
+    //Para calcular el tiempo promedio entre generaciones
+    let inicioTPorGeneracion = Date.now();
+    
     // si ya tienen los mismos elementos en comun, sale
     if(comun === findCommonElements(image1, puntosNegrosFinal, width, height)){
       console.log("Mismos elementos en comun")
@@ -274,38 +281,39 @@ async function runGeneticAlgorithm() {
     hijo = mutacion(puntosNegros, hijo, width, height);
     madre = mutacion(puntosNegros, madre, width, height);
 
-    //console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    console.log("Fitness de la imagen en el proceso: ",findCommonElements(image1, puntosNegrosFinal, width, height))
+    console.log("Generacion numero: ", gen)
+
+    //Primero sumamos los tiempos de cada generación
+    tPromPorGen += Date.now() - inicioTPorGeneracion;
+
+    //Actualizamos el tiempo de inicio antes de la nueva generacion
+    inicioTPorGeneracion = Date.now();
 
     gen++ //generacion
 
   }
-  
 
-  //crearImagen(imagePath, puntosNegrosFinal)
+  console.log("\n=========================================")
+  //Sacamos el tiempo promedio dividiendo entre la cantidad de generaciones
+  tPromPorGen = (tPromPorGen / maxGeneraciones) / 1000; //de milisegundos a segundos
+
+  console.log("Pixeles negros de la imagen objetivo:", findCommonElements(image1, puntosNegros, width, height))
+  console.log("Pixeles negros de la imagen final:",findCommonElements(image1, puntosNegrosFinal, width, height))
+
+  //Medimos el tiempo total
+  let final = Date.now();
+  tiempoTotal = (final - inicio) / 1000; //de milisegundos a segundos
+
+  console.log("El tiempo total es", tiempoTotal, "segundos.");
+  console.log("El tiempo promedio por generacion es", tPromPorGen, "segundos.")
+
+  crearImagen(imagePath, puntosNegrosFinal)
 
   return 
 }
 
-
-function actualizarGrafico() {
-  let valor = Math.random() * 10; // Genera un nuevo valor aleatorio
-
-  // Actualizar los datos
-  data.labels.push(data.labels.length + 1); // Agregar una nueva etiqueta en el eje x
-  data.datasets[0].data.push(valor); // Agregar un nuevo valor en la serie de datos
-
-  // Crear o actualizar el gráfico
-  if (window.graficoLineal) {
-    window.graficoLineal.update(); // Actualizar el gráfico existente
-  } else {
-    const ctx = document.getElementById("grafico-lineal").getContext("2d");
-    window.graficoLineal = new Chart(ctx, {
-      type: "line", // Tipo de gráfico lineal
-      data: data,
-      options: options
-    });
-  }
-}
 
 runGeneticAlgorithm();
 
