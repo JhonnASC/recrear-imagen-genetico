@@ -33,11 +33,14 @@ app.post('/process-image', (req, res) => {
   const tasaMutacion = req.body.tasaMutacion;
   const tasaCombinacion = req.body.tasaCombinacion;
   const hijosPorGen = req.body.hijosPorGen;
+  const parametroFaltante = req.body.parametroFaltante;
+
 
   console.log(maxGeneraciones);
   console.log(tasaMutacion);
   console.log(tasaCombinacion);
   console.log(hijosPorGen);
+  console.log(parametroFaltante)
 
   const image = req.files.image;
 
@@ -57,7 +60,7 @@ app.post('/process-image', (req, res) => {
 
 
 
-          ///////////////////////////////////////////////////
+///////////////////////////////////////////////////
 //     IMPLEMENTACION PARA CARGAR LA IMAGEN      //
 ///////////////////////////////////////////////////
 /**
@@ -271,14 +274,28 @@ function agregaPuntosNegros(puntosNegros, padre){
  * Main del programa.
  */
 async function runGeneticAlgorithm() {
+    //Variables de tiempo
+    var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
+    var tPromPorGen = 0;        //tiempo promedio entre generaciones
   
-  const outputImagePath = 'public/imagenFinalFinal.png';
+  
+  
+  
+    const outputImagePath = 'public/imagenFinalFinal.png';
   fs.unlink(outputImagePath, (err) => {
     if (err && err.code !== 'ENOENT') {
       console.error('Error deleting previous image:', err);
     }
   });
   
+
+  let inicio = Date.now();
+  //Variables de tiempo
+   var tiempoTotal = 0;        //tiempo de ejecucion del algoritmo
+   var tPromPorGen = 0;  
+
+
+
   //=================================================================================================================
   //CREAMOS LA VARIABLE PARA ALMACENAR LOS PUNTOS X y Y de la imagen del usuario
   const puntosNegros = []                      // array de la imagen del usuario
@@ -299,7 +316,7 @@ for (let y = 0; y < height; y++) {
     }
   }
 }
-console.log(puntosNegros)
+
   //================================================================================================================
   let comun = findCommonElements(image1, puntosNegros, width, height)  // almacena cuantos elementos tienen en comun
   let gen = 1
@@ -314,7 +331,7 @@ console.log(puntosNegros)
   let hijo = crossover(padre, madre, width, hijosPorGen, puntosNegros) // 10, numero de hijos que se crean
 
   while (gen <= maxGeneraciones){   // realizamos el ciclo para intentar recrear la imagen de manera genetica
-
+    let inicioTPorGeneracion = Date.now();
     // si ya tienen los mismos elementos en comun, sale
     if(comun === findCommonElements(image1, puntosNegrosFinal, width, height)){
       console.log("Mismos elementos en comun")
@@ -330,15 +347,33 @@ console.log(puntosNegros)
     hijo = mutacion(puntosNegros, hijo, width, height);
     madre = mutacion(puntosNegros, madre, width, height);
 
-    console.log(findCommonElements(image1, puntosNegrosFinal, width, height)) // imprime las similitudes que tenga la imagen del usuario y la imagen final
-    console.log(gen)
+    // imprime las similitudes que tenga la imagen del usuario y la imagen final
+    console.log("Fitness de la imagen en el proceso: ",findCommonElements(image1, puntosNegrosFinal, width, height))
+    console.log("Generacion numero: ", gen)
+
+    //Primero sumamos los tiempos de cada generación
+    tPromPorGen += Date.now() - inicioTPorGeneracion;
+
+    //Actualizamos el tiempo de inicio antes de la nueva generacion
+    inicioTPorGeneracion = Date.now();
+
+
     gen++ //generacion
   }
   console.log(findCommonElements(image1, puntosNegros, width, height))
   console.log(findCommonElements(image1, puntosNegrosFinal, width, height))
   crearImagen(imagePath, puntosNegrosFinal)
 
+  console.log("\n=========================================")
+  //Sacamos el tiempo promedio dividiendo entre la cantidad de generaciones
+  tPromPorGen = (tPromPorGen / maxGeneraciones) / 1000; //de milisegundos a segundos
 
+  //Medimos el tiempo total
+    let final = Date.now();
+    tiempoTotal = (final - inicio) / 1000; //de milisegundos a segundos
+
+    console.log("El tiempo total es", tiempoTotal, "segundos.");
+    console.log("El tiempo promedio por generacion es", tPromPorGen, "segundos.")
 
   return
 }
