@@ -8,10 +8,10 @@ const imagePath1 = 'public/calavera.jpeg';       //imagen del usuario
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
 
 //Variables para el Algoritmo Genético
-const maxGeneraciones = 10; //cantidad de generaciones
-const tasaMutacion = 0.2;    //20% de los genes se mutarán
-const tasaCombinacion = 0.3;  //cantidad de combinados
-const tasaSeleccion = 0.4;  //cantidad de hijos que pasan a la otra generacion
+const maxGeneraciones = 50; //cantidad de generaciones
+const tasaMutacion = 0.4;    //20% de los genes se mutarán
+const tasaCombinacion = 0.4;  //cantidad de combinados
+const tasaSeleccion = 0.1;  //cantidad de hijos que pasan a la otra generacion
 
 ///////////////////////////////////////////////////
 //     IMPLEMENTACION PARA CARGAR LA IMAGEN      //
@@ -134,11 +134,14 @@ function best(arrayObjetivo, padre, madre, hijo) {
   let similitudesMadre = contarSimilitudes(arrayObjetivo, madre);
   let similitudesHijo = contarSimilitudes(arrayObjetivo, hijo);
 
-  if (similitudesPadre >= similitudesMadre && similitudesPadre >= similitudesHijo) {
+  if (similitudesPadre >=similitudesMadre && similitudesPadre >= similitudesHijo) {
+    console.log("Padre")
     return padre;
   } else if (similitudesMadre >= similitudesPadre && similitudesMadre >= similitudesHijo) {
+    console.log("madre")
     return madre;
   } else {
+    console.log("hijo")
     return hijo;
   }
 }
@@ -296,6 +299,10 @@ async function runGeneticAlgorithm() {
     cantSelec += hijosPorGen - (cantSelec + cantMut + cantComb);
   }
 
+  //si se documentan, sale mejor
+  padre = []
+  madre = []
+
   // realizamos el ciclo para intentar recrear la imagen de manera genetica
   while (gen <= maxGeneraciones){
 
@@ -304,8 +311,6 @@ async function runGeneticAlgorithm() {
       console.log("Mismos elementos en comun")
       break;
     }
-
-    
 
     var copiahijosPorGen = hijosPorGen;
 
@@ -390,6 +395,11 @@ async function runGeneticAlgorithm() {
     mejorFitnessPorGen.push(mejorFitness);
 
     padre = best(puntosNegros, padre, madre, hijo)
+
+    madre = hijo
+    madre = mutacion(puntosNegros, puntosNegrosFinal, width, height)
+    hijo = mutacion(puntosNegros, puntosNegrosFinal, width, height)
+    
     console.log(padre)
 
     puntosNegrosFinal = agregaPuntosNegros(puntosNegros, padre);
