@@ -8,7 +8,7 @@ const imagePath1 = 'public/calavera.jpeg';       //imagen del usuario
 const imagePath = 'public/imagen_final.png';     //base de la imagen, imagen blanca para escribir
 
 //Variables para el Algoritmo Genético
-const maxGeneraciones = 10; //cantidad de generaciones
+const maxGeneraciones = 20; //cantidad de generaciones
 const tasaMutacion = 0.2;    //20% de los genes se mutarán
 const tasaCombinacion = 0.3;  //cantidad de combinados
 const tasaSeleccion = 0.4;  //cantidad de hijos que pasan a la otra generacion
@@ -135,10 +135,13 @@ function best(arrayObjetivo, padre, madre, hijo) {
   let similitudesHijo = contarSimilitudes(arrayObjetivo, hijo);
 
   if (similitudesPadre >= similitudesMadre && similitudesPadre >= similitudesHijo) {
+    console.log("padre")
     return padre;
   } else if (similitudesMadre >= similitudesPadre && similitudesMadre >= similitudesHijo) {
+    console.log("madre")
     return madre;
   } else {
+    console.log("hijo")
     return hijo;
   }
 }
@@ -380,19 +383,21 @@ async function runGeneticAlgorithm() {
     hijosDeCombinacion = [];
 
     let mejorFitness = 0
+    let hijo1 = []
     for (let i = 0; i < generacion.length; i++) {
       fitnessPorHijo = contarSimilitudes(puntosNegros, generacion[i]);
       if (fitnessPorHijo > mejorFitness) {
         mejorFitness = fitnessPorHijo;
-        hijo = generacion[i];
+        hijo1 = generacion[i];
       }
     }
     mejorFitnessPorGen.push(mejorFitness);
 
-    padre = best(puntosNegros, padre, madre, hijo)
-    console.log(padre)
+    padre = best(puntosNegros, padre, madre, hijo1)
 
     puntosNegrosFinal = agregaPuntosNegros(puntosNegros, padre);
+
+
 
     // imprime las similitudes que tenga la imagen del usuario y la imagen final
     console.log("Fitness de la imagen en el proceso: ",findCommonElements(image1, puntosNegrosFinal, width, height))
