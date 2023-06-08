@@ -19,9 +19,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/ver-stats', (req, res) => {
-  res.sendFile(path.join(__dirname, 'grafico.html'));
-});
+
 
 
 app.post('/process-image', (req, res) => {
